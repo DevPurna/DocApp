@@ -1,4 +1,4 @@
-import React, { useState,useMemo  } from "react";
+import React, { useState, useMemo } from "react";
 import Header from "../components/Header";
 import { doctors } from "../assets/assets";
 import { useParams } from "react-router-dom";
@@ -41,14 +41,13 @@ const DoctorProfile = () => {
     // Clear confirmation after 5 seconds
     setTimeout(() => {
       setConfirmation("");
-    }, 3000);
+    }, 5000); // changed to 5000 ms (5 sec)
   };
 
   const generateTimeSlots = (selectedDate) => {
     const slots = [];
-    const startHour = 9; // 9 AM
-    const endHour = 18; // 6 PM
-
+    const startHour = 9;
+    const endHour = 18;
     const now = new Date();
     const selected = new Date(selectedDate);
     const isToday = now.toDateString() === selected.toDateString();
@@ -57,7 +56,6 @@ const DoctorProfile = () => {
     let currentMinute = 0;
 
     if (isToday) {
-      // If current time is past endHour, no slots today
       if (
         now.getHours() > endHour ||
         (now.getHours() === endHour && now.getMinutes() > 0)
@@ -65,7 +63,6 @@ const DoctorProfile = () => {
         return ["No slots today"];
       }
 
-      // If current time is after 9 AM, update slot start time to next 30-min mark
       if (now.getHours() >= startHour) {
         currentHour = now.getHours();
         currentMinute = now.getMinutes() > 30 ? 0 : 30;
@@ -80,7 +77,6 @@ const DoctorProfile = () => {
       const formattedTime = formatAMPM(currentHour, currentMinute);
       slots.push(formattedTime);
 
-      // Increment by 30 minutes
       currentMinute += 30;
       if (currentMinute === 60) {
         currentMinute = 0;
@@ -97,6 +93,37 @@ const DoctorProfile = () => {
     const m = minute === 0 ? "00" : minute;
     return `${h}:${m} ${ampm}`;
   };
+
+  //Memoized booking dates
+  const bookingDates = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() + index);
+
+      const dayName = date.toLocaleDateString("en-US", {
+        weekday: "short",
+      });
+      const dateNum = date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+      });
+
+      return { index, dayName, dateNum, date };
+    });
+  }, []);
+
+  //Memoized selected date
+  const selectedDate = useMemo(() => {
+    if (selectedDateIndex === null) return null;
+    const date = new Date();
+    date.setDate(date.getDate() + selectedDateIndex);
+    return date;
+  }, [selectedDateIndex]);
+
+  //Memoized time slots
+  const timeSlots = useMemo(() => {
+    return selectedDate ? generateTimeSlots(selectedDate) : [];
+  }, [selectedDate]);
 
   return (
     <div>
@@ -135,67 +162,45 @@ const DoctorProfile = () => {
           <div className="flex flex-col mt-[40px]">
             <p>Booking slots</p>
             <ul className="flex gap-3 p-5">
-              {Array.from({ length: 7 }).map((_, index) => {
-                const date = new Date();
-                date.setDate(date.getDate() + index);
-
-                const dayName = date.toLocaleDateString("en-US", {
-                  weekday: "short",
-                });
-                const dateNum = date.toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                });
-
-                return (
-                  <li key={index}>
-                    <button
-                      className={`px-4 py-2 border rounded-lg hover:bg-blue-200 ${
-                        selectedDateIndex === index ? "bg-blue-300" : ""
-                      }`}
-                      onClick={() => setSelectedDateIndex(index)}
-                    >
-                      <p>{dayName}</p>
-                      <p>{dateNum}</p>
-                    </button>
-                  </li>
-                );
-              })}
+              {bookingDates.map(({ index, dayName, dateNum }) => (
+                <li key={index}>
+                  <button
+                    className={`px-4 py-2 border rounded-lg hover:bg-blue-200 ${
+                      selectedDateIndex === index ? "bg-blue-300" : ""
+                    }`}
+                    onClick={() => setSelectedDateIndex(index)}
+                  >
+                    <p>{dayName}</p>
+                    <p>{dateNum}</p>
+                  </button>
+                </li>
+              ))}
             </ul>
 
             {/* Time slots for selected date */}
-            {selectedDateIndex !== null &&
-              (() => {
-                const selectedDate = new Date();
-                selectedDate.setDate(
-                  selectedDate.getDate() + selectedDateIndex
-                );
+            {selectedDate && (
+              <ul className="flex overflow-x-auto scrollbar-hide whitespace-nowrap space-x-4 px-4 py-2 max-w-[700px]">
+                {timeSlots.map((time, idx) =>
+                  time === "No slots today" ? (
+                    <p key={idx} className="text-red-600">
+                      {time}
+                    </p>
+                  ) : (
+                    <li key={idx}>
+                      <button
+                        className={`flex-shrink-0 px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm cursor-pointer ${
+                          selectedTime === time ? "bg-green-300" : ""
+                        }`}
+                        onClick={() => setSelectedTime(time)}
+                      >
+                        {time}
+                      </button>
+                    </li>
+                  )
+                )}
+              </ul>
+            )}
 
-                const slots = generateTimeSlots(selectedDate);
-
-                return (
-                  <ul className="flex overflow-x-auto scrollbar-hide whitespace-nowrap space-x-4 px-4 py-2 max-w-[700px]">
-                    {slots.map((time, idx) =>
-                      time === "No slots today" ? (
-                        <p key={idx} className="text-red-600">
-                          {time}
-                        </p>
-                      ) : (
-                        <li key={idx}>
-                          <button
-                            className={`flex-shrink-0 px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm cursor-pointer ${
-                              selectedTime === time ? "bg-green-300" : ""
-                            }`}
-                            onClick={() => setSelectedTime(time)}
-                          >
-                            {time}
-                          </button>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                );
-              })()}
             {selectedTime && selectedDateIndex !== null && (
               <button
                 type="button"
@@ -205,6 +210,7 @@ const DoctorProfile = () => {
                 Book Appointment
               </button>
             )}
+
             {showForm && (
               <form
                 onSubmit={handleFormSubmit}
@@ -240,6 +246,7 @@ const DoctorProfile = () => {
                 </button>
               </form>
             )}
+
             {confirmation && (
               <p className="mt-4 text-green-600 font-semibold">
                 {confirmation}
