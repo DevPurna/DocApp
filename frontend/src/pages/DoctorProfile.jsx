@@ -38,10 +38,10 @@ const DoctorProfile = () => {
     setSelectedDateIndex(null); // Deselect date
     setSelectedTime(""); // Deselect time
 
-    // Clear confirmation after 5 seconds
+    // Clear confirmation after 3 seconds
     setTimeout(() => {
       setConfirmation("");
-    }, 5000); // changed to 5000 ms (5 sec)
+    }, 3000); // changed to 3000 ms (3 sec)
   };
 
   const generateTimeSlots = (selectedDate) => {
@@ -128,44 +128,42 @@ const DoctorProfile = () => {
   return (
     <div>
       <Header />
-      <div className="flex p-5 justify-center">
-        <div className="bg-blue-300 w-[35%] mt-4 h-[250px] rounded-lg">
+      <div className="flex flex-col lg:flex-row p-4 md:p-6 lg:p-8 justify-center items-center lg:items-start gap-4">
+        <div className="bg-blue-300 w-full sm:w-2/3 md:w-1/2 lg:w-[35%] h-[250px] rounded-lg overflow-hidden">
           <img
             src={selectedDoctor.image}
             alt="doctor-img"
-            className="h-[250px]"
+            className="h-full w-full object-cover object-top"
           />
         </div>
-        <div className="flex flex-col p-5">
-          <div className="flex flex-col p-5 border border-gray-300 shadow-md rounded-lg">
-            <div className="flex gap-2">
-              <h1 className="text-2xl font-bold">{selectedDoctor.name}</h1>
-              <img
-                src={verified_icon}
-                alt="verified img"
-                className="w-[20px]"
-              />
+        <div className="flex flex-col w-full lg:w-[55%] p-2 sm:p-4 md:p-6">
+          <div className="flex flex-col p-4 sm:p-6 border border-gray-300 shadow-md rounded-lg bg-white">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold">
+                {selectedDoctor.name}
+              </h1>
+              <img src={verified_icon} alt="verified" className="w-4 sm:w-5" />
             </div>
-            <p className="text-base mb-3">
+            <p className="text-sm sm:text-base mb-2 sm:mb-3">
               {selectedDoctor.degree} - {selectedDoctor.speciality}
-              <span className="px-2 text-sm border border-gray-300 rounded-lg ml-2">
+              <span className="ml-2 px-2 text-xs sm:text-sm border border-gray-300 rounded-lg">
                 {selectedDoctor.experience}
               </span>
             </p>
-            <p className="font-bold">About</p>
-            <p className="w-[80%] mb-3">{selectedDoctor.about}</p>
+            <p className="font-semibold mb-1">About</p>
+            <p className="text-sm sm:text-base mb-3">{selectedDoctor.about}</p>
             <p>
               Appointment fee:{" "}
-              <span className="font-bold">${selectedDoctor.fees}</span>{" "}
+              <span className="font-bold">${selectedDoctor.fees}</span>
             </p>
           </div>
-          <div className="flex flex-col mt-[40px]">
-            <p>Booking slots</p>
-            <ul className="flex gap-3 p-5">
+          <div className="flex flex-col mt-6">
+            <p className="mb-2 text-base font-semibold">Booking slots</p>
+            <ul className="flex gap-3 overflow-x-auto scrollbar-hide p-3">
               {bookingDates.map(({ index, dayName, dateNum }) => (
                 <li key={index}>
                   <button
-                    className={`px-4 py-2 border rounded-lg hover:bg-blue-200 ${
+                    className={`min-w-[60px] px-3 py-2 border rounded-lg text-sm text-center hover:bg-blue-200 ${
                       selectedDateIndex === index ? "bg-blue-300" : ""
                     }`}
                     onClick={() => setSelectedDateIndex(index)}
@@ -179,16 +177,16 @@ const DoctorProfile = () => {
 
             {/* Time slots for selected date */}
             {selectedDate && (
-              <ul className="flex overflow-x-auto scrollbar-hide whitespace-nowrap space-x-4 px-4 py-2 max-w-[700px]">
+              <ul className="flex overflow-x-auto scrollbar-hide whitespace-nowrap space-x-3 px-3 py-2 max-w-full">
                 {timeSlots.map((time, idx) =>
                   time === "No slots today" ? (
-                    <p key={idx} className="text-red-600">
+                    <p key={idx} className="text-red-600 text-sm">
                       {time}
                     </p>
                   ) : (
                     <li key={idx}>
                       <button
-                        className={`flex-shrink-0 px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm cursor-pointer ${
+                        className={`min-w-[80px] px-3 py-2 border rounded-md text-xs sm:text-sm bg-gray-100 ${
                           selectedTime === time ? "bg-green-300" : ""
                         }`}
                         onClick={() => setSelectedTime(time)}
@@ -204,7 +202,7 @@ const DoctorProfile = () => {
             {selectedTime && selectedDateIndex !== null && (
               <button
                 type="button"
-                className="bg-blue-500 rounded-lg text-sm align-start h-[30px] w-[20%] text-white mt-3"
+                className="bg-blue-500 rounded-lg text-white text-sm mt-3 h-10 w-full sm:w-1/2 lg:w-1/3"
                 onClick={() => setShowForm(true)}
               >
                 Book Appointment
@@ -212,43 +210,53 @@ const DoctorProfile = () => {
             )}
 
             {showForm && (
-              <form
-                onSubmit={handleFormSubmit}
-                className="mt-4 border p-4 rounded-md bg-gray-100 w-[80%]"
-              >
-                <div className="mb-2">
-                  <label className="block text-sm font-medium">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-2 border rounded"
-                  />
+              <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-md shadow-lg w-[90%] max-w-md">
+                  <form onSubmit={handleFormSubmit}>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium">Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        className="bg-gray-400 text-white px-4 py-2 rounded text-sm sm:text-base sm:px-4 sm:py-2 px-2 py-1"
+                        onClick={() => setShowForm(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-green-500 text-white px-4 py-2 rounded text-sm sm:text-base sm:px-4 sm:py-2 px-2 py-1"
+                      >
+                        Confirm Appointment
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div className="mb-2">
-                  <label className="block text-sm font-medium">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded mt-2"
-                >
-                  Confirm Appointment
-                </button>
-              </form>
+              </div>
             )}
 
             {confirmation && (
-              <p className="mt-4 text-green-600 font-semibold">
+              <p className="mt-4 text-green-600 font-semibold text-sm sm:text-base">
                 {confirmation}
               </p>
             )}

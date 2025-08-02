@@ -38,7 +38,7 @@ const Home = () => {
       <Header />
       <div className="p-4 flex-grow">
         <div className="flex gap-5 h-[calc(100vh-100px)]">
-          <div className="bg-white w-2/4 max-w-[250px] p-4 shadow rounded-lg">
+          <div className="hidden md:block bg-white w-2/4 max-w-[250px] p-4 shadow rounded-lg">
             <p className="text-base font-bold mb-4">Choose Specialization</p>
             <ul>
               {specialityData.map((each) => (
@@ -61,7 +61,7 @@ const Home = () => {
               placeholder="Search Doctor Name..."
               value={inputName}
               onChange={(e) => setInputName(e.target.value)}
-              className="w-[30%] h-[40px] outline-none rounded-lg text-sm px-4 mb-4 border border-gray-300"
+              className="sm:w-[90%] md:w-[60%] lg:w-[30%] h-[40px] outline-none rounded-lg text-sm px-4 mb-4 border border-gray-300"
             />
             {filteredDoctors.length === 0 ? (
               <p className="text-center text-gray-500 mt-6">
