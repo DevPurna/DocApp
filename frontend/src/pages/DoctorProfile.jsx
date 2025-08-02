@@ -1,4 +1,8 @@
 import React, { useState, useMemo } from "react";
+
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+
 import Header from "../components/Header";
 import { doctors } from "../assets/assets";
 import { useParams } from "react-router-dom";
@@ -8,7 +12,7 @@ const DoctorProfile = () => {
   const { id } = useParams();
   const selectedDoctor = doctors.find((eachDoc) => eachDoc._id === id);
 
-  const [selectedDateIndex, setSelectedDateIndex] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
 
   const [confirmation, setConfirmation] = useState("");
@@ -27,15 +31,16 @@ const DoctorProfile = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     setConfirmation(
-      `Appointment booked for ${formData.name} on ${new Date(
-        Date.now() + selectedDateIndex * 86400000
-      ).toDateString()} at ${selectedTime}. A confirmation has been sent to ${
+      `Appointment booked for ${
+        formData.name
+      } on ${selectedDate.toDateString()} at ${selectedTime}. A confirmation has been sent to ${
         formData.email
       }.`
     );
+
     setShowForm(false);
     setFormData({ name: "", email: "" }); // Reset form fields
-    setSelectedDateIndex(null); // Deselect date
+    setSelectedDate(null); // reset calendar
     setSelectedTime(""); // Deselect time
 
     // Clear confirmation after 3 seconds
@@ -94,32 +99,6 @@ const DoctorProfile = () => {
     return `${h}:${m} ${ampm}`;
   };
 
-  //Memoized booking dates
-  const bookingDates = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, index) => {
-      const date = new Date();
-      date.setDate(date.getDate() + index);
-
-      const dayName = date.toLocaleDateString("en-US", {
-        weekday: "short",
-      });
-      const dateNum = date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      });
-
-      return { index, dayName, dateNum, date };
-    });
-  }, []);
-
-  //Memoized selected date
-  const selectedDate = useMemo(() => {
-    if (selectedDateIndex === null) return null;
-    const date = new Date();
-    date.setDate(date.getDate() + selectedDateIndex);
-    return date;
-  }, [selectedDateIndex]);
-
   //Memoized time slots
   const timeSlots = useMemo(() => {
     return selectedDate ? generateTimeSlots(selectedDate) : [];
@@ -159,21 +138,17 @@ const DoctorProfile = () => {
           </div>
           <div className="flex flex-col mt-6">
             <p className="mb-2 text-base font-semibold">Booking slots</p>
-            <ul className="flex gap-3 overflow-x-auto scrollbar-hide p-3">
-              {bookingDates.map(({ index, dayName, dateNum }) => (
-                <li key={index}>
-                  <button
-                    className={`min-w-[60px] px-3 py-2 border rounded-lg text-sm text-center hover:bg-blue-200 ${
-                      selectedDateIndex === index ? "bg-blue-300" : ""
-                    }`}
-                    onClick={() => setSelectedDateIndex(index)}
-                  >
-                    <p>{dayName}</p>
-                    <p>{dateNum}</p>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <Calendar
+              onChange={(value) => setSelectedDate(value)}
+              value={selectedDate}
+              minDate={new Date()} // only allow today & future dates
+              tileDisabled={({ date }) => date.getDay() === 0} // disable Sundays
+              tileClassName={({ date }) =>
+                date.getDay() === 0
+                  ? "bg-red-200 text-gray-400 cursor-not-allowed"
+                  : ""
+              }
+            />
 
             {/* Time slots for selected date */}
             {selectedDate && (
@@ -199,10 +174,11 @@ const DoctorProfile = () => {
               </ul>
             )}
 
-            {selectedTime && selectedDateIndex !== null && (
+            {selectedTime && selectedDate && (
               <button
                 type="button"
-                className="bg-blue-500 rounded-lg text-white text-sm mt-3 h-10 w-full sm:w-1/2 lg:w-1/3"
+                className="bg-blue-500 rounded-lg text-white text-sm mt-3 h-10 w-full sm:w-1/2 lg:w-1/3 disabled:opacity-50"
+                disabled={!selectedTime}
                 onClick={() => setShowForm(true)}
               >
                 Book Appointment
