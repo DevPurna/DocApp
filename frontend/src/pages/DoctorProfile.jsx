@@ -129,11 +129,11 @@ const DoctorProfile = () => {
     <div>
       <Header />
       <div className="flex flex-col lg:flex-row p-4 md:p-6 lg:p-8 justify-center items-center lg:items-start gap-4">
-        <div className="bg-blue-300 w-full sm:w-2/3 md:w-1/2 lg:w-[35%] h-[250px] rounded-lg overflow-hidden">
+        <div className="bg-blue-300 w-full sm:w-2/3 md:w-1/2 lg:w-[20%] h-[250px] lg:mt-5 rounded-lg overflow-hidden">
           <img
             src={selectedDoctor.image}
             alt="doctor-img"
-            className="h-full w-full object-cover object-top"
+            className="h-full w-full lg:w-[90%] object-cover object-top"
           />
         </div>
         <div className="flex flex-col w-full lg:w-[55%] p-2 sm:p-4 md:p-6">
